@@ -47,6 +47,13 @@ jobs:
         run: |
           bundle config set --local deployment 'true'
           bundle install --jobs 4 --retry 3
+          
+      - name: Decode and create Google service plist file
+        env:
+          GOOGLE_SERVICE_PLIST_BASE_64: ${{secrets.GOOGLE_SERVICE_PLIST_BASE_64}}
+        run: |
+          FILE_PATH="${GITHUB_WORKSPACE}"/helloworld
+          echo $GOOGLE_SERVICE_PLIST_BASE_64 | base64 -di > "${FILE_PATH}"/GoogleService-Info.plist
 
       - name: Build, test, archive and distribute app
         env:  
