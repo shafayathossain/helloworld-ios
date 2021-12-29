@@ -9,8 +9,6 @@ version_suffix_string = nil
 target_name_and_version_string = nil
 
 # Build configurations for dev, test, staging and prod Xcode schemes.
-buildConfigs = {
-  buildName: "dev",
   bundleId: "com.shafayat.helloworld",
   provisioningProfile: "match AppStore com.shafayat.helloworld",
   schemeName: "helloworld",
@@ -63,7 +61,7 @@ lane :release do |options|
 
   install_pods
 
-  unit_tests(schemeName: buildConfigs[:schemeName])
+  # unit_tests(schemeName: buildConfigs[:schemeName])
 
   build(buildConfig: buildConfigs)
 
@@ -180,7 +178,7 @@ private_lane :add_git_tag_and_push do |options|
     grouping: "builds",
     includes_lane: false,
     postfix: version_suffix_string,
-    prefix: options[:buildConfig][:buildName],
+    prefix: "prod",
   )
 
   push_to_git_remote(
