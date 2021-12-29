@@ -9,6 +9,7 @@ version_suffix_string = nil
 target_name_and_version_string = nil
 
 # Build configurations for dev, test, staging and prod Xcode schemes.
+buildConfigs = {
   bundleId: "com.shafayat.helloworld",
   provisioningProfile: "match AppStore com.shafayat.helloworld",
   schemeName: "helloworld",
