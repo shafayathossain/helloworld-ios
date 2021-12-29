@@ -1,0 +1,193 @@
+min_fastlane_version "2.192.0"
+
+skip_docs
+opt_out_usage
+fastlane_require 'dotenv'
+api_key = nil
+keychain_name = nil
+version_suffix_string = nil
+target_name_and_version_string = nil
+
+# Build configurations for dev, test, staging and prod Xcode schemes.
+buildConfigs = {
+  buildName: "dev",
+  bundleId: "com.shafayat.helloworld",
+  provisioningProfile: "match AppStore com.shafayat.helloworld",
+  schemeName: "helloworld",
+  targetName: "helloworld",
+}
+
+
+# This block will get executed before running the requested lane.
+before_all do |lane|
+  puts "------------------------"
+  puts "--- Step: before_all ---"
+  puts "------------------------"
+
+  # Load local secrets
+  Dotenv.overload '.env.secret'
+
+  keychain_name = "login" # Default macOS keychain
+  # Environment secrets required for local dev
+  ensure_env_vars(
+    env_vars: [
+      'APP_STORE_CONNECT_TEAM_ID',
+      'APP_STORE_CONNECT_TEAM_NAME',
+      'APP_STORE_CONNECT_USERNAME',
+      'FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD',
+      'MATCH_GIT_URL',
+      'MATCH_PASSWORD',
+    ]
+  )
+
+  # General environment secrets
+  ensure_env_vars(
+    env_vars: [
+      'BUILD_PATH',
+      'TEST_SIMULATOR_MODEL',
+      'XCODE_PROJECT_NAME',
+    ]
+  )
+  
+end
+
+
+
+desc "Build, test, archive and distribute ipa to TestFlight."
+desc "Required parameters:"
+desc "- buildConfigName: The name of the build configuration to use: dev, test, staging or prod."
+desc ""
+lane :release do |options|
+  
+  set_build_number(buildConfig: buildConfigs)
+
+  install_pods
+
+  unit_tests(schemeName: buildConfigs[:schemeName])
+
+  build(buildConfig: buildConfigs)
+
+  distribute_testflight(buildConfig: buildConfigs)
+  add_git_tag_and_push(buildConfig: buildConfigs)
+  
+end
+
+
+desc "Sync code signing certificates and provisioning profiles."
+desc ""
+lane :local_setup do
+  certificate_update(
+    appIdentifiers: options[:buildConfig][:bundleId],
+    profileType: "development",
+  )
+  certificate_update(
+    appIdentifiers: options[:buildConfig][:bundleId],
+    profileType: "appstore",
+  )
+end
+
+
+desc "Responsible for incrementing build number and committing."
+desc "Required parameters:"
+desc "- buildConfig : Build configuration."
+private_lane :set_build_number do |options|
+  increment_build_number(build_number: number_of_commits)
+
+  version_number = get_version_number(
+    target: options[:buildConfig][:targetName],
+    xcodeproj: ENV['XCODE_PROJECT_NAME'] + ".xcodeproj",
+  )
+
+  build_number = get_build_number(
+    xcodeproj: ENV['XCODE_PROJECT_NAME'] + ".xcodeproj",
+  )
+
+  puts "Settings common variables..."
+  version_suffix_string = "-v#{version_number}-#{build_number}"
+  puts "version_suffix_string = " + version_suffix_string
+  target_name_and_version_string = options[:buildConfig][:targetName] + version_suffix_string
+  puts "target_name_and_version_string = " + target_name_and_version_string
+  puts "DONE."
+end
+
+desc "Run unit tests."
+desc "Required parameters:"
+desc "- schemeName : The Xcode scheme name to be tested."
+desc ""
+lane :unit_tests do |options|
+  scan(
+    workspace: ENV['XCODE_PROJECT_NAME'] + ".xcworkspace",
+    devices: [ENV['TEST_SIMULATOR_MODEL']],
+    scheme: options[:schemeName],
+  )
+end
+
+
+desc "Responsible for installing Cocoapods dependencies"
+private_lane :install_pods do |options|
+  cocoapods(
+    clean_install: false,
+    use_bundle_exec: true,
+  )
+end
+
+
+desc "Responsible for building and signing."
+desc "Required parameters:"
+desc "- buildConfig : Build configuration."
+private_lane :build do |options|
+  puts "#{options.inspect}"
+  gym(
+    build_path: ENV['BUILD_PATH'],
+    clean: true,
+    export_method: "app-store",
+    export_options: {
+      provisioningProfiles: {
+        options[:buildConfig][:bundleId] => options[:buildConfig][:provisioningProfile]
+      }
+    },
+    include_symbols: true,
+    output_directory: ENV['BUILD_PATH'],
+    output_name: target_name_and_version_string,
+    scheme: options[:buildConfig][:schemeName],
+    silent: false,
+    workspace: ENV['XCODE_PROJECT_NAME'] + ".xcworkspace",
+  )
+end
+
+
+desc "Responsible for uploading ipa to TestFlight."
+desc "Required parameters:"
+desc "- buildConfig : Build configuration."
+private_lane :distribute_testflight do |options|
+  upload_to_testflight(
+      verbose: true,
+      app_identifier: options[:buildConfig][:bundleId],
+      ipa: ENV['BUILD_PATH'] + target_name_and_version_string + ".ipa",
+      username: ENV["FASTLANE_USER"],
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+  )
+end
+
+
+desc "Responsible for adding a git tag and pushing to remote."
+desc "Required parameters:"
+desc "- buildConfig : Build configuration."
+private_lane :add_git_tag_and_push do |options|
+  add_git_tag(
+    build_number: "",
+    grouping: "builds",
+    includes_lane: false,
+    postfix: version_suffix_string,
+    prefix: options[:buildConfig][:buildName],
+  )
+
+  push_to_git_remote(
+    local_branch: "master",
+    remote: "origin",
+    remote_branch: "master",
+    tags: true,
+  )
+end
+
