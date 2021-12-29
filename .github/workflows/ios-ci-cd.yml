@@ -53,7 +53,7 @@ jobs:
           GOOGLE_SERVICE_PLIST_BASE_64: ${{secrets.GOOGLE_SERVICE_PLIST_BASE_64}}
         run: |
           FILE_PATH="${GITHUB_WORKSPACE}"/helloworld
-          echo $GOOGLE_SERVICE_PLIST_BASE_64 | base64 -di > "${FILE_PATH}"/GoogleService-Info.plist
+          echo $GOOGLE_SERVICE_PLIST_BASE_64 | base64 -Dd > "${FILE_PATH}"/GoogleService-Info.plist
 
       - name: Build, test, archive and distribute app
         env:  
