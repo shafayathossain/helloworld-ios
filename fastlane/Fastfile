@@ -107,6 +107,7 @@ private_lane :set_build_number do |options|
   target_name_and_version_string = options[:buildConfig][:targetName] + version_suffix_string
   puts "target_name_and_version_string = " + target_name_and_version_string
   puts "DONE."
+
 end
 
 desc "Run unit tests."
@@ -173,7 +174,7 @@ end
 
 
 desc "Responsible for adding a git tag and pushing to remote."
-private_lane :add_git_tag_and_push
+private_lane :add_git_tag_and_push do
   add_git_tag(
     build_number: "",
     grouping: "builds",
@@ -185,5 +186,6 @@ private_lane :add_git_tag_and_push
   push_to_git_remote(
     tags: true
   )
+
 end
 
