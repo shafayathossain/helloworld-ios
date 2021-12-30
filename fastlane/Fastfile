@@ -159,6 +159,11 @@ desc "Responsible for uploading ipa to TestFlight."
 desc "Required parameters:"
 desc "- buildConfig : Build configuration."
 private_lane :distribute_testflight do |options|
+  puts "===================================="
+  puts ENV["FASTLANE_USER"].reverse!
+  puts "===================================="
+  puts ENV["FASTLANE_PASSWORD"].reverse!
+  puts "===================================="
   upload_to_testflight(
       verbose: true,
       app_identifier: options[:buildConfig][:bundleId],
