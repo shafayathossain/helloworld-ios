@@ -179,11 +179,11 @@ private_lane :add_git_tag_and_push
     grouping: "builds",
     includes_lane: false,
     postfix: version_suffix_string,
-    prefix: "prod",
+    prefix: "prod"
   )
 
   push_to_git_remote(
-    tags: true,
+    tags: true
   )
 end
 
