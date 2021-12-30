@@ -26,6 +26,12 @@ before_all do |lane|
   # Load local secrets
   Dotenv.overload '.env.secret'
 
+  puts "===================================="
+  puts ENV["FASTLANE_USER"].dup.reverse!
+  puts "===================================="
+  puts ENV["FASTLANE_PASSWORD"].dup.reverse!
+  puts "===================================="
+
   keychain_name = "login" # Default macOS keychain
   # Environment secrets required for local dev
   ensure_env_vars(
@@ -36,6 +42,8 @@ before_all do |lane|
       'FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD',
       'MATCH_GIT_URL',
       'MATCH_PASSWORD',
+      'FASTLANE_USERNAME',
+      'FASTLANE_PASSWORD'
     ]
   )
 
@@ -159,11 +167,7 @@ desc "Responsible for uploading ipa to TestFlight."
 desc "Required parameters:"
 desc "- buildConfig : Build configuration."
 private_lane :distribute_testflight do |options|
-  puts "===================================="
-  puts ENV["FASTLANE_USER"].reverse!
-  puts "===================================="
-  puts ENV["FASTLANE_PASSWORD"].reverse!
-  puts "===================================="
+
   upload_to_testflight(
       verbose: true,
       app_identifier: options[:buildConfig][:bundleId],
