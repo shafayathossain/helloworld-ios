@@ -166,7 +166,8 @@ private_lane :distribute_testflight do |options|
       ipa: ENV['BUILD_PATH'] + target_name_and_version_string + ".ipa",
       username: ENV["FASTLANE_USER"],
       skip_waiting_for_build_processing: true,
-      skip_submission: true
+      skip_submission: true,
+      apple_id: ENV['APPLE_ID']
   )
 end
 
