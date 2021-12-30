@@ -185,9 +185,6 @@ private_lane :add_git_tag_and_push do |options|
   )
 
   push_to_git_remote(
-    local_branch: "master",
-    remote: "origin",
-    remote_branch: "master",
     tags: true,
   )
 end
