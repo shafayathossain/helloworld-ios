@@ -26,12 +26,6 @@ before_all do |lane|
   # Load local secrets
   Dotenv.overload '.env.secret'
 
-  puts "===================================="
-  puts ENV["FASTLANE_USER"].dup.reverse!
-  puts "===================================="
-  puts ENV["FASTLANE_PASSWORD"].dup.reverse!
-  puts "===================================="
-
   keychain_name = "login" # Default macOS keychain
   # Environment secrets required for local dev
   ensure_env_vars(
@@ -41,9 +35,7 @@ before_all do |lane|
       'APP_STORE_CONNECT_USERNAME',
       'FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD',
       'MATCH_GIT_URL',
-      'MATCH_PASSWORD',
-      'FASTLANE_USERNAME',
-      'FASTLANE_PASSWORD'
+      'MATCH_PASSWORD'
     ]
   )
 
