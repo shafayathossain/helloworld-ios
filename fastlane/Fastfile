@@ -90,7 +90,8 @@ desc "Responsible for incrementing build number and committing."
 desc "Required parameters:"
 desc "- buildConfig : Build configuration."
 private_lane :set_build_number do |options|
-  increment_build_number(build_number: number_of_commits)
+  
+  increment_build_number()
 
   version_number = get_version_number(
     target: options[:buildConfig][:targetName],
