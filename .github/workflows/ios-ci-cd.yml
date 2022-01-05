@@ -61,9 +61,6 @@ jobs:
           APP_STORE_CONNECT_TEAM_NAME: ${{secrets.APP_STORE_CONNECT_TEAM_NAME}}
           APP_STORE_CONNECT_USERNAME: ${{secrets.APP_STORE_CONNECT_USERNAME}}
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD}}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         run: |
           export LC_ALL=en_US.UTF-8
           export LANG=en_US.UTF-8
